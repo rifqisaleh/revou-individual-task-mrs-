@@ -2,15 +2,16 @@ import sys
 from app import db
 from app.models.models import Product
 from flask import abort
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import get_jwt_identity, get_jwt
 
 
 def create_product(data):
-    identity = get_jwt_identity()
+    user_id = int(get_jwt_identity())
+    claims = get_jwt()
     print("CREATE DATA:", data, file=sys.stderr, flush=True)
-    print("JWT IDENTITY:", identity, file=sys.stderr, flush=True)
+    print("JWT IDENTITY:", user_id, "ROLE:", claims["role"], file=sys.stderr, flush=True)
 
-    if identity["role"] not in ["admin", "seller"]:
+    if claims["role"] not in ["admin", "seller"]:
         abort(403, "Only admin or seller can create products")
 
     try:
@@ -20,7 +21,7 @@ def create_product(data):
             price=data["price"],
             stock=data["stock"],
             image_url=data.get("image_url", ""),
-            seller_id=identity["id"],
+            seller_id=user_id,
         )
     except Exception as e:
         print("CREATE PRODUCT ERROR:", e, file=sys.stderr, flush=True)
@@ -48,13 +49,14 @@ def get_product_by_id(product_id):
 
 
 def update_product(product_id, data):
-    identity = get_jwt_identity()
+    user_id = int(get_jwt_identity())
+    claims = get_jwt()
     product = Product.query.get(product_id)
 
     if not product:
         abort(404, "Product not found")
 
-    if identity["id"] != product.seller_id and identity["role"] != "admin":
+    if user_id != product.seller_id and claims["role"] != "admin":
         abort(403, "Not authorized to update this product")
 
     product.name = data.get("name", product.name)
@@ -68,13 +70,14 @@ def update_product(product_id, data):
 
 
 def delete_product(product_id):
-    identity = get_jwt_identity()
+    user_id = int(get_jwt_identity())
+    claims = get_jwt()
     product = Product.query.get(product_id)
 
     if not product:
         abort(404, "Product not found")
 
-    if identity["id"] != product.seller_id and identity["role"] != "admin":
+    if user_id != product.seller_id and claims["role"] != "admin":
         abort(403, "Not authorized to delete this product")
 
     db.session.delete(product)

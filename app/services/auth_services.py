@@ -32,8 +32,10 @@ def login_user(data):
         return {"msg": "Invalid username or password"}, 401
 
     access_token = create_access_token(
-        identity={"id": user.id, "role": user.role},
+        identity=str(user.id),  # ✅ ID must be string
+        additional_claims={"role": user.role},  # ✅ put role in custom claims
         expires_delta=timedelta(hours=3)
     )
 
     return {"access_token": access_token}, 200
+

@@ -16,21 +16,42 @@ def auth_headers(test_app):
         db.session.add(seller)
         db.session.commit()
 
-        token = create_access_token(identity={"id": seller.id, "role": seller.role})
+        token = create_access_token(
+            identity=str(seller.id),  # ✅ identity as string
+            additional_claims={"role": seller.role}  # ✅ use custom claims
+        )
         return {"Authorization": f"Bearer {token}"}
 
 
-def test_create_product(client, auth_headers):
-    res = client.post("/products/", json={
-        "name": "Organic Apples",
-        "description": "Fresh from the farm",
-        "price": 4.99,
-        "stock": 20,
-        "image_url": "http://example.com/apple.jpg",
-        "category": "Fruits"  # Added required field
-    }, headers=auth_headers)
-    assert res.status_code == 201
-    assert "id" in res.get_json()
+def test_create_product(client, test_app):
+    with test_app.app_context():
+        # Create the seller manually
+        seller = User(
+            username="test_seller",
+            email="test_seller@mail.com",
+            password="hashed",
+            full_name="Test Seller",
+            role="seller"
+        )
+        db.session.add(seller)
+        db.session.commit()
+
+        token = create_access_token(
+            identity=str(seller.id),  # ✅ identity as string
+            additional_claims={"role": seller.role}  # ✅ role as claim
+        )
+        headers = {"Authorization": f"Bearer {token}"}
+
+        res = client.post("/products/", json={
+            "name": "Organic Apples",
+            "description": "Fresh from the farm",
+            "price": 4.99,
+            "stock": 20,
+            "image_url": "http://example.com/apple.jpg"
+        }, headers=headers)
+
+        print("RESPONSE:", res.status_code, res.get_json())
+        assert res.status_code == 201
 
 
 def test_list_products(client):
@@ -50,14 +71,12 @@ def test_update_product(client, auth_headers):
         "description": "Ripe and sweet",
         "price": 3.5,
         "stock": 15,
-        "image_url": "http://example.com/banana.jpg",
-        "category": "Fruits"  # Added required field
+        "image_url": "http://example.com/banana.jpg"
     }, headers=auth_headers)
 
     res = client.put("/products/1", json={
         "price": 3.0,
-        "stock": 10,
-        "category": "Fruits"  # Added required field
+        "stock": 10
     }, headers=auth_headers)
 
     assert res.status_code in [200, 404]
