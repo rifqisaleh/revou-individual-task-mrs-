@@ -21,10 +21,15 @@ def create_app():
     from app.models import models  
     from app.routes.auth import auth_bp
     from app.routes.product import product_bp
+    from app.routes.cart import cart_bp
+    from app.routes.order import order_bp
 
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(product_bp, url_prefix="/products")
+    app.register_blueprint(cart_bp, url_prefix="/cart")
+    app.register_blueprint(order_bp, url_prefix="/orders")
 
+    
     @app.errorhandler(422)
     def handle_422(err):
         print("🔥 422 ERROR:", err, file=sys.stderr, flush=True)

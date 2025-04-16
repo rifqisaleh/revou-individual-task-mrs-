@@ -42,7 +42,8 @@ def get_all_products():
 
 
 def get_product_by_id(product_id):
-    product = Product.query.get(product_id)
+    product = db.session.get(Product, product_id)
+
     if not product:
         abort(404, "Product not found")
     return product
@@ -51,7 +52,8 @@ def get_product_by_id(product_id):
 def update_product(product_id, data):
     user_id = int(get_jwt_identity())
     claims = get_jwt()
-    product = Product.query.get(product_id)
+    product = db.session.get(Product, product_id)
+
 
     if not product:
         abort(404, "Product not found")
@@ -72,7 +74,8 @@ def update_product(product_id, data):
 def delete_product(product_id):
     user_id = int(get_jwt_identity())
     claims = get_jwt()
-    product = Product.query.get(product_id)
+    product = db.session.get(Product, product_id)
+
 
     if not product:
         abort(404, "Product not found")

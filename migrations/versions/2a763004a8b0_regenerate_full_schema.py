@@ -1,8 +1,8 @@
-"""Register marketplace models
+"""Regenerate full schema
 
-Revision ID: a3fd7d67c6e7
-Revises: 
-Create Date: 2025-04-16 13:42:50.318042
+Revision ID: 2a763004a8b0
+Revises: a3ffe5b5f6e0
+Create Date: 2025-04-16 18:00:41.618032
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'a3fd7d67c6e7'
-down_revision = None
+revision = '2a763004a8b0'
+down_revision = 'a3ffe5b5f6e0'
 branch_labels = None
 depends_on = None
 

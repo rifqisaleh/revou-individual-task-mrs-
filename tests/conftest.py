@@ -1,18 +1,18 @@
 import pytest
-from app import create_app, db
-from flask_jwt_extended import create_access_token
+from app import create_app, db, jwt
 
 @pytest.fixture
 def test_app():
     app = create_app()
     app.config.update({
         "TESTING": True,
-        "DEBUG": True,  
+        "DEBUG": True,
         "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
         "SQLALCHEMY_TRACK_MODIFICATIONS": False,
-        "JWT_SECRET_KEY": "test-secret",
+        "JWT_SECRET_KEY": "supersecretkey"
     })
 
+    jwt.init_app(app)  # must come after config
 
     with app.app_context():
         db.create_all()
