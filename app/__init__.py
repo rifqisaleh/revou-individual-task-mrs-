@@ -1,3 +1,4 @@
+import sys
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -19,9 +20,16 @@ def create_app():
 
     from app.models import models  
     from app.routes.auth import auth_bp
+    from app.routes.product import product_bp
 
     app.register_blueprint(auth_bp, url_prefix="/auth")
+    app.register_blueprint(product_bp, url_prefix="/products")
 
-    
+    @app.errorhandler(422)
+    def handle_422(err):
+        print("🔥 422 ERROR:", err, file=sys.stderr, flush=True)
+        return {"msg": "Unprocessable Entity", "error": str(err)}, 422
+
+
     return app
 

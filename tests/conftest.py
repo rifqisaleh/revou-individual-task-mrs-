@@ -7,10 +7,12 @@ def test_app():
     app = create_app()
     app.config.update({
         "TESTING": True,
+        "DEBUG": True,  
         "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
         "SQLALCHEMY_TRACK_MODIFICATIONS": False,
         "JWT_SECRET_KEY": "test-secret",
     })
+
 
     with app.app_context():
         db.create_all()
