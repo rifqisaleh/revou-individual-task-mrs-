@@ -75,7 +75,7 @@ JWT_SECRET_KEY=supersecretkey
 ### Start the Server
 
 ```bash
-uv python -m app.main
+python -m app.main
 # or
 FLASK_APP=app/main.py flask run --debug
 ```
