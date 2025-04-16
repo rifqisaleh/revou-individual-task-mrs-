@@ -3,6 +3,7 @@ from app import db
 from app.models.models import Product
 from flask import abort
 from flask_jwt_extended import get_jwt_identity, get_jwt
+from sqlalchemy import asc, desc
 
 
 def create_product(data):
@@ -37,8 +38,36 @@ def create_product(data):
     return product
 
 
-def get_all_products():
-    return Product.query.all()
+def get_all_products(filters):
+    query = Product.query
+
+    # Filtering
+    if filters.get("seller_id"):
+        query = query.filter_by(seller_id=int(filters["seller_id"]))
+
+    if filters.get("min_price"):
+        query = query.filter(Product.price >= float(filters["min_price"]))
+
+    if filters.get("max_price"):
+        query = query.filter(Product.price <= float(filters["max_price"]))
+
+    if filters.get("in_stock") == "true":
+        query = query.filter(Product.stock > 0)
+
+    # Sorting
+    sort_by = filters.get("sort_by", "id")
+    order = filters.get("order", "asc")
+
+    sort_column = getattr(Product, sort_by, Product.id)
+    sort_method = asc if order == "asc" else desc
+    query = query.order_by(sort_method(sort_column))
+
+    # Pagination
+    page = int(filters.get("page", 1))
+    limit = int(filters.get("limit", 10))
+    paginated = query.paginate(page=page, per_page=limit, error_out=False)
+
+    return paginated.items
 
 
 def get_product_by_id(product_id):

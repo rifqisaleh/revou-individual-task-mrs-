@@ -37,3 +37,19 @@ def remove_from_cart(item_id):
     db.session.delete(item)
     db.session.commit()
     return True
+
+def update_cart_quantity(item_id, quantity):
+    user_id = int(get_jwt_identity())
+    item = db.session.get(CartItem, item_id)
+
+    if not item or item.user_id != user_id:
+        abort(404, "Cart item not found or access denied")
+
+    item.quantity = quantity
+    db.session.commit()
+    return item
+
+def clear_user_cart():
+    user_id = int(get_jwt_identity())
+    CartItem.query.filter_by(user_id=user_id).delete()
+    db.session.commit()

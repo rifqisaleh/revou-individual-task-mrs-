@@ -15,7 +15,8 @@ def create():
 
 @product_bp.route("/", methods=["GET"])
 def list_products():
-    products = get_all_products()
+    filters = request.args
+    products = get_all_products(filters)
     return jsonify([{
         "id": p.id,
         "name": p.name,
@@ -23,6 +24,7 @@ def list_products():
         "stock": p.stock,
         "seller_id": p.seller_id
     } for p in products])
+
 
 @product_bp.route("/<int:product_id>", methods=["GET"])
 def detail(product_id):

@@ -80,3 +80,45 @@ def test_remove_from_cart(client, test_app):
 
     assert res.status_code == 200
     assert res.get_json()["msg"] == "Item removed from cart"
+
+
+def test_update_cart_quantity(client, test_app):
+    _, product_id, headers = get_auth_header_for_user(test_app)
+
+    # Add item
+    res_add = client.post("/cart/", json={
+        "product_id": product_id,
+        "quantity": 2
+    }, headers=headers)
+    item_id = res_add.get_json()["item_id"]
+
+    # Update quantity
+    res_patch = client.patch(f"/cart/{item_id}/", json={
+        "quantity": 5
+    }, headers=headers)
+
+    assert res_patch.status_code == 200
+    data = res_patch.get_json()
+    assert data["new_quantity"] == 5
+    assert data["msg"] == "Quantity updated"
+
+
+def test_clear_cart(client, test_app):
+    _, product_id, headers = get_auth_header_for_user(test_app)
+
+    # Add two items
+    for _ in range(2):
+        client.post("/cart/", json={
+            "product_id": product_id,
+            "quantity": 1
+        }, headers=headers)
+
+    # Clear cart
+    res_clear = client.delete("/cart/", headers=headers)
+    assert res_clear.status_code == 200
+    assert res_clear.get_json()["msg"] == "Cart cleared"
+
+    # Ensure cart is empty
+    res_get = client.get("/cart/", headers=headers)
+    assert res_get.status_code == 200
+    assert res_get.get_json() == []
