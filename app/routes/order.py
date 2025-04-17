@@ -73,7 +73,7 @@ def get_order_detail(order_id):
 
 @order_bp.route("/<int:order_id>", methods=["PATCH"])
 @jwt_required()
-@role_required("admin", "seller")  # You can also allow "seller" if needed
+@role_required("admin", "seller")  
 def patch_order_status(order_id):
     user_id = get_jwt_identity()
     data = request.get_json()
