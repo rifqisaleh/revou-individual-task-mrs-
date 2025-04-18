@@ -119,7 +119,7 @@ Authorization: Bearer <your_token_here>
 - `DELETE /cart/<item_id>/` – Remove item from cart
 
 ### 🧾 Orders
-- `POST /orders/checkout` – Checkout and create an order from cart
+- `POST /orders/checkout` – Checkout and create an order from cart. Users can also do transaction
 - `GET /orders/me` – View user’s order history
 - `GET /orders/<id>` – View a specific order
 - `PATCH /orders/<id>` – Update order status (admin/seller only)
