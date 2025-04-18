@@ -1,6 +1,6 @@
 import json  # Add this import for JSON serialization
 from flask_jwt_extended import create_access_token
-from app.models.models import User, Product, CartItem, db
+from app.models.models import User, Product, CartItem, db, Transaction
 
 def setup_user_cart(test_app):
     with test_app.app_context():
@@ -29,7 +29,7 @@ def setup_user_cart(test_app):
         db.session.add(cart)
         db.session.commit()
 
-        token = create_access_token(identity=str(user.id))
+        token = create_access_token(identity=str(user.id), fresh=True)
         headers = {"Authorization": f"Bearer {token}"}
         return user, product, headers
 
@@ -141,3 +141,25 @@ def test_patch_order_status(client, test_app):
         assert patch_res.status_code == 200
         assert patch_res.get_json()["msg"] == "Order updated successfully"
 
+
+def test_transactions_created_on_checkout(client, test_app):
+    user, product, headers = setup_user_cart(test_app)
+    # Query product price in a fresh session to avoid DetachedInstanceError
+    with test_app.app_context():
+        product_db = Product.query.filter_by(name="Test Item").first()
+        product_price = product_db.price
+
+    res = client.post("/orders/checkout", json={"payment_method": "credit_card"}, headers=headers)
+    data = res.get_json()
+    print("Checkout Result:", res.status_code, data)
+
+    assert res.status_code == 201
+    order_id = data.get("order_id")
+    assert order_id is not None
+
+    with test_app.app_context():
+        tx = Transaction.query.filter_by(order_id=order_id).first()
+        assert tx is not None
+        assert tx.method == "credit_card"
+        assert tx.status == "pending"
+        assert tx.amount == product_price * 2  # use captured price

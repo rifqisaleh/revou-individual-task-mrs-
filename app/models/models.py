@@ -71,14 +71,14 @@ class OrderItem(db.Model):
     product = db.relationship("Product")
 
     
-class Transactions(db.Model):
+class Transaction(db.Model):
     __tablename__ = "transactions"
 
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False)
     method = db.Column(db.String(50), nullable=False)
     amount = db.Column(db.Float, nullable=False)
-    status = db.Column(db.Float, nullable=False)
+    status = db.Column(db.String(50), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     order = db.relationship("Order", backref="transactions", uselist=False)   

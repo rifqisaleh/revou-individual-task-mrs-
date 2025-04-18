@@ -10,10 +10,12 @@ order_bp = Blueprint("orders", __name__)
 def create_order():
     print("🛬 /orders/checkout was reached")
     user_id = get_jwt_identity()
-    
-    print("✅ JWT received, user_id =", user_id)
+    data = request.get_json() or {}
 
-    order, error = checkout(user_id)
+    print("✅ JWT received, user_id =", user_id)
+    print("Received Payment Method:", data.get("payment_method"))
+
+    order, error = checkout(user_id, data)
     if error:
         print("❌ Checkout error:", error)
         return jsonify({"msg": error}), 400

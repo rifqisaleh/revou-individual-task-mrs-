@@ -1,5 +1,5 @@
 from app import db
-from app.models.models import CartItem, Order, OrderItem, Product, Transactions
+from app.models.models import CartItem, Order, OrderItem, Product, Transaction
 from datetime import datetime
 
 
@@ -53,9 +53,12 @@ def checkout(user_id, data=None):
     
     if data is None:
         data = {}
-    transaction = Transactions(
+
+    method = data.get("payment_method", "bank_transfer")
+
+    transaction = Transaction(
         order_id=order.id,
-        method=data.get("payment_method", "bank_transfer"),
+        method=method,
         amount=order.total_amount,
         status="pending"
     )
