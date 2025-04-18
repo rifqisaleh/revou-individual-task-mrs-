@@ -1,9 +1,9 @@
 from app import db
-from app.models.models import CartItem, Order, OrderItem, Product
+from app.models.models import CartItem, Order, OrderItem, Product, Transactions
 from datetime import datetime
 
 
-def checkout(user_id):
+def checkout(user_id, data=None):
     print("✅ CHECKOUT STARTED for user_id:", user_id)
 
     # Fetch cart items for the user
@@ -49,6 +49,20 @@ def checkout(user_id):
     CartItem.query.filter_by(user_id=user_id).delete()
 
     db.session.commit()
+
+    
+    if data is None:
+        data = {}
+    transaction = Transactions(
+        order_id=order.id,
+        method=data.get("payment_method", "bank_transfer"),
+        amount=order.total_amount,
+        status="pending"
+    )
+    db.session.add(transaction)
+    db.session.commit()
+    
+
     print("✅ CHECKOUT COMPLETE — Order ID:", order.id)
     return order, None
 
